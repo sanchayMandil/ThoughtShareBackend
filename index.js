@@ -227,6 +227,10 @@ io.on('connection', (socket) => {
   });
 });
 
+<<<<<<< HEAD
+=======
+
+>>>>>>> 4e9dbf90adb696e82d11e77a438b71f611d22826
 app.get('/', (req, res) => {
   res.send('WhiteBoard Collaboration Server is running');
 });
