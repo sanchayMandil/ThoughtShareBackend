@@ -223,6 +223,10 @@ io.on('connection', (socket) => {
   });
 });
 
+
+app.get('/', (req, res) => {
+  res.send('WhiteBoard Collaboration Server is running');
+});
 app.get('/board/:id', loadContent);
 app.put('/board/:id', updateContent);
 app.get('/dashboard', fetchBoard);
