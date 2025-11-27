@@ -1,19 +1,9 @@
 require('dotenv').config(); // Load environment variables
-const nodemailer = require('nodemailer');
 const users = require("../models/users");
-
-function generateOTP() {
-  let otp = '';
-  for (let i = 0; i < 6; i++) {
-    otp += Math.floor(Math.random() * 10); // Generate a random digit (0-9)
-  }
-  return otp;
-}
-
+const axios = require('axios');
 async function verifyemial(req, res) {
   const Uemail = req.body.email;
   const query = { email: Uemail };
-  const OTP = generateOTP();
 
   try {
     const existingUser = await users.findOne(query); // Use findOne, not find
@@ -23,31 +13,11 @@ async function verifyemial(req, res) {
       return res.json({ allow: false }); // User exists, don't send email
     } else {
       console.log("User not found, sending email with OTP");
-
-      const transporter = nodemailer.createTransport({
-        host: "smtp.gmail.com",
-        port: 587,
-        secure: false, // Set to true for port 465, false for others
-        auth: {
-          user: process.env.PROJECT_MAIL, // Use environment variable for email
-          pass: process.env.PROJECT_MAIL_PASSWORD, // Use environment variable for app password
-        },
-      });
-
-      const mailOptions = {
-        from: `"MyApp" <${process.env.PROJECT_MAIL}>`, // Correct sender format
-        to: Uemail, // Recipient address (from the request)
-        subject: 'Welcome to MyApp!', // Subject of the email
-        text: 'Thank you for registering with WhiteBoard! opt :' + OTP + '', // Plain text body
-        html: '<p>Thank you for registering with <strong>WhiteBoard</strong>! opt :' + OTP + '</p>', // HTML body
-      };
-
-      transporter.sendMail(mailOptions, (error, info) => {
-        if (error) {
-          return res.status(500).send('Error sending email: ' + error.message);
-        }
-        res.json({ allow: true, opt: OTP });
-      });
+      
+      const response = await axios.post(process.env.MAIL_SERVICE_URL, { email: Uemail , appName:"ThoughtShare"});
+      console.log("Email service response:", response.data);
+      return res.json({ allow: response.data.allow , otp: response.data.opt }); // User doesn't exist, email sent
+     
     }
   } catch (error) {
     console.error("Error during email verification:", error);
